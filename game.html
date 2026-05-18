@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>记忆翻牌</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.container {
+  text-align: center;
+  padding: 20px;
+}
+
+h1 {
+  color: #e94560;
+  font-size: 2rem;
+  margin-bottom: 16px;
+  text-shadow: 0 2px 8px rgba(233, 69, 96, 0.3);
+}
+
+.stats {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  margin-bottom: 20px;
+  color: #eee;
+  font-size: 1.1rem;
+}
+
+.stats span { font-weight: bold; color: #f5f5f5; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 80px);
+  grid-template-rows: repeat(4, 80px);
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.card {
+  perspective: 600px;
+  cursor: pointer;
+}
+
+.card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.4s ease;
+  transform-style: preserve-3d;
+}
+
+.card.flipped .card-inner {
+  transform: rotateY(180deg);
+}
+
+.card-front, .card-back {
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  backface-visibility: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+}
+
+.card-front {
+  background: linear-gradient(135deg, #e94560, #c23152);
+  transform: rotateY(180deg);
+}
+
+.card-back {
+  background: linear-gradient(135deg, #2a2a4a, #1a1a3e);
+  border: 2px solid #3a3a6a;
+  font-size: 1.5rem;
+}
+
+.card-back::after {
+  content: '?';
+  color: #555;
+  font-weight: bold;
+}
+
+.card.matched .card-front {
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
+}
+
+.card.matched {
+  cursor: default;
+  pointer-events: none;
+}
+
+button {
+  padding: 10px 32px;
+  font-size: 1rem;
+  background: #e94560;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+button:hover { background: #c23152; }
+
+.win-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.win-overlay.hidden { display: none; }
+
+.win-box {
+  background: #1a1a2e;
+  border: 2px solid #e94560;
+  border-radius: 16px;
+  padding: 32px 48px;
+  text-align: center;
+  color: #fff;
+}
+
+.win-box h2 { color: #e94560; margin-bottom: 12px; font-size: 1.8rem; }
+.win-box p { margin-bottom: 6px; font-size: 1.1rem; }
+.win-box button { margin-top: 16px; }
+
+@media (max-width: 400px) {
+  .grid {
+    grid-template-columns: repeat(4, 70px);
+    grid-template-rows: repeat(4, 70px);
+    gap: 6px;
+  }
+  .card-front, .card-back { font-size: 1.5rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>记忆翻牌</h1>
+  <div class="stats">
+    <div>步数: <span id="moves">0</span></div>
+    <div>用时: <span id="time">00:00</span></div>
+  </div>
+  <div class="grid" id="grid"></div>
+  <button id="reset">重新开始</button>
+  <div class="win-overlay hidden" id="winOverlay">
+    <div class="win-box">
+      <h2>你赢了!</h2>
+      <p>步数: <span id="winMoves"></span></p>
+      <p>用时: <span id="winTime"></span></p>
+      <button id="playAgain">再来一局</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const emojis = ['🍎','🍋','🍇','🍒','🥝','🍊','🍌','🍑'];
+const cards = [...emojis, ...emojis];
+
+let grid = document.getElementById('grid');
+let movesEl = document.getElementById('moves');
+let timeEl = document.getElementById('time');
+let winOverlay = document.getElementById('winOverlay');
+let moves = 0;
+let flipped = [];
+let matched = 0;
+let lock = false;
+let timer = 0;
+let timerId = null;
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+
+function render() {
+  shuffle(cards);
+  grid.innerHTML = '';
+  cards.forEach((emoji, i) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.dataset.index = i;
+    card.dataset.emoji = emoji;
+    card.innerHTML = `
+      <div class="card-inner">
+        <div class="card-front">${emoji}</div>
+        <div class="card-back"></div>
+      </div>`;
+    card.addEventListener('click', () => flip(card));
+    grid.appendChild(card);
+  });
+}
+
+function flip(card) {
+  if (lock) return;
+  if (card.classList.contains('flipped')) return;
+  if (card.classList.contains('matched')) return;
+
+  card.classList.add('flipped');
+  flipped.push(card);
+
+  if (!timerId) startTimer();
+
+  if (flipped.length === 2) {
+    moves++;
+    movesEl.textContent = moves;
+    lock = true;
+    const [a, b] = flipped;
+    if (a.dataset.emoji === b.dataset.emoji) {
+      a.classList.add('matched');
+      b.classList.add('matched');
+      matched += 2;
+      flipped = [];
+      lock = false;
+      if (matched === 16) win();
+    } else {
+      setTimeout(() => {
+        a.classList.remove('flipped');
+        b.classList.remove('flipped');
+        flipped = [];
+        lock = false;
+      }, 600);
+    }
+  }
+}
+
+function startTimer() {
+  timer = 0;
+  timerId = setInterval(() => {
+    timer++;
+    const m = String(Math.floor(timer / 60)).padStart(2, '0');
+    const s = String(timer % 60).padStart(2, '0');
+    timeEl.textContent = `${m}:${s}`;
+  }, 1000);
+}
+
+function stopTimer() {
+  clearInterval(timerId);
+  timerId = null;
+}
+
+function win() {
+  stopTimer();
+  document.getElementById('winMoves').textContent = moves + ' 步';
+  document.getElementById('winTime').textContent = timeEl.textContent;
+  winOverlay.classList.remove('hidden');
+}
+
+function reset() {
+  stopTimer();
+  timer = 0;
+  timeEl.textContent = '00:00';
+  moves = 0;
+  movesEl.textContent = '0';
+  flipped = [];
+  matched = 0;
+  lock = false;
+  winOverlay.classList.add('hidden');
+  render();
+}
+
+document.getElementById('reset').addEventListener('click', reset);
+document.getElementById('playAgain').addEventListener('click', reset);
+
+render();
+</script>
+</body>
+</html>

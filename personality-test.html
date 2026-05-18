@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>这位老公喜欢你的追星模式</title>
+<style>
+:root {
+  --bg: #1a1028;
+  --card: #241838;
+  --accent: #e892b0;
+  --accent2: #c77dff;
+  --text: #e8dff0;
+  --muted: #9a8aaf;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  background-image: radial-gradient(ellipse at top, #2d1a4a 0%, #1a1028 60%);
+  color: var(--text);
+  font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.container { width: 100%; max-width: 640px; }
+
+.stage { display: none; }
+.stage.active { display: block; }
+
+/* ====== Home ====== */
+.home-card {
+  background: var(--card);
+  border-radius: 20px;
+  padding: 48px 36px;
+  text-align: center;
+  border: 1px solid #3d2a5a;
+  box-shadow: 0 8px 40px rgba(199,125,255,0.1);
+}
+
+.home-card h1 {
+  font-size: 2.2rem;
+  background: linear-gradient(135deg, #e892b0, #c77dff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 8px;
+}
+
+.home-card .subtitle { color: var(--muted); font-size: 0.95rem; margin-bottom: 32px; }
+
+.home-card .desc {
+  text-align: left; font-size: 0.95rem; line-height: 1.8;
+  color: #c0b0d0; margin-bottom: 36px;
+}
+
+.home-card .desc p { margin-bottom: 8px; }
+
+.btn {
+  display: inline-block; padding: 13px 44px; font-size: 1.05rem;
+  background: linear-gradient(135deg, #c77dff, #e892b0);
+  color: #fff; border: none; border-radius: 25px;
+  cursor: pointer; transition: opacity 0.2s, transform 0.1s;
+  font-weight: 600; letter-spacing: 1px;
+}
+
+.btn:hover { opacity: 0.9; }
+.btn:active { transform: scale(0.97); }
+
+.btn-secondary { background: #3d2a5a; }
+.btn-secondary:hover { background: #4d3a6a; }
+
+/* ====== Quiz ====== */
+.quiz-header {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;
+}
+
+.progress-text { font-size: 0.9rem; color: var(--muted); }
+
+.progress-bar {
+  width: 100%; height: 5px; background: #3d2a5a;
+  border-radius: 3px; margin-bottom: 24px; overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%; background: linear-gradient(90deg, #c77dff, #e892b0);
+  border-radius: 3px; transition: width 0.3s ease;
+}
+
+.question-card {
+  background: var(--card); border-radius: 20px; padding: 32px 28px;
+  border: 1px solid #3d2a5a;
+}
+
+.question-num {
+  font-size: 0.8rem; color: #c77dff; margin-bottom: 14px; font-weight: bold;
+  letter-spacing: 2px; text-transform: uppercase;
+}
+
+.question-text {
+  font-size: 1.1rem; line-height: 1.8; margin-bottom: 24px;
+  color: #f0e8f8;
+}
+
+.options { display: flex; flex-direction: column; gap: 10px; }
+
+.option {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 14px 16px; background: #2d1d44;
+  border: 2px solid transparent; border-radius: 12px;
+  cursor: pointer; transition: all 0.2s; font-size: 0.9rem;
+  line-height: 1.55; color: #c8b8d8; text-align: left;
+}
+
+.option:hover { background: #352550; }
+.option.selected {
+  border-color: #c77dff;
+  background: #352250;
+  color: #f0e8f8;
+}
+
+.option .letter {
+  width: 26px; height: 26px; border-radius: 50%;
+  border: 2px solid #5a4a7a; display: flex; align-items: center;
+  justify-content: center; flex-shrink: 0; font-size: 0.8rem;
+  font-weight: bold; color: #9a8aaf; transition: all 0.2s;
+}
+
+.option.selected .letter { border-color: #c77dff; color: #c77dff; background: #3d2060; }
+
+.quiz-nav {
+  display: flex; justify-content: space-between; margin-top: 24px;
+}
+
+/* ====== Result ====== */
+.result-card {
+  background: var(--card); border-radius: 20px; padding: 36px 28px;
+  border: 1px solid #3d2a5a; text-align: center;
+}
+
+.idol-sparkle {
+  font-size: 0.85rem; color: #c77dff; letter-spacing: 3px; margin-bottom: 4px;
+}
+
+.idol-name {
+  font-size: 2.6rem; font-weight: bold;
+  background: linear-gradient(135deg, #f0c0d0, #d0a0ff);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  margin-bottom: 4px; letter-spacing: 4px;
+}
+
+.idol-label {
+  font-size: 0.9rem; color: #b098c8; margin-bottom: 24px;
+}
+
+.husband-card {
+  background: linear-gradient(135deg, #2d1848, #351d50);
+  border: 1px solid #5a3a80; border-radius: 16px;
+  padding: 24px 20px; margin-bottom: 28px; text-align: left;
+}
+
+.husband-card .label {
+  font-size: 0.8rem; color: #c77dff; letter-spacing: 2px; margin-bottom: 8px;
+}
+
+.husband-card .traits {
+  font-size: 0.95rem; line-height: 1.8; color: #d8c8e8;
+}
+
+.husband-card .lovestory {
+  margin-top: 16px; padding-top: 16px; border-top: 1px solid #3d2a5a;
+  font-size: 0.9rem; line-height: 1.8; color: #c0a8d8;
+}
+
+.chart-section { margin-bottom: 24px; }
+
+.chart-section h3 {
+  text-align: left; margin-bottom: 14px; font-size: 0.95rem; color: #c0b0d0;
+}
+
+.chart {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  height: 180px; padding-top: 10px; border-bottom: 1px solid #3d2a5a;
+}
+
+.bar-wrapper { display: flex; flex-direction: column; align-items: center; flex: 1; max-width: 55px; }
+
+.bar-label { font-size: 0.7rem; color: var(--muted); margin-bottom: 4px; }
+
+.bar {
+  width: 30px; border-radius: 4px 4px 0 0; transition: height 0.6s ease; min-height: 4px;
+  background: linear-gradient(to top, #c77dff, #e892b0);
+}
+
+.bar-value { font-size: 0.7rem; color: #b098c8; margin-top: 4px; }
+
+.chart-legend {
+  display: flex; flex-wrap: wrap; gap: 6px 14px; justify-content: center;
+  margin-top: 10px; font-size: 0.75rem; color: #9a8aaf;
+}
+
+.runner-up {
+  font-size: 0.85rem; color: #9a8aaf; margin-bottom: 24px; line-height: 1.6;
+}
+
+.runner-up strong { color: #c77dff; }
+
+/* ====== Ending Overlay ====== */
+.ending-overlay {
+  position: fixed; inset: 0; z-index: 100;
+  background: #fce4ec;
+  display: flex; align-items: center; justify-content: center;
+  transition: opacity 1s ease;
+}
+
+.ending-overlay.fade-out {
+  opacity: 0; pointer-events: none;
+}
+
+.wave-text {
+  font-size: 1.25rem;
+  color: #c96d82;
+  text-align: center;
+  padding: 40px;
+  line-height: 2.2;
+  letter-spacing: 2px;
+  font-weight: 500;
+  max-width: 480px;
+  animation: waveFloat 5s ease-in-out forwards;
+}
+
+@keyframes waveFloat {
+  0%   { opacity: 0; transform: translateY(36px); }
+  12%  { opacity: 1; transform: translateY(0); }
+  24%  { opacity: 0.5; transform: translateY(-10px); }
+  36%  { opacity: 1; transform: translateY(0); }
+  48%  { opacity: 0.6; transform: translateY(-6px); }
+  60%  { opacity: 0.9; transform: translateY(0); }
+  72%  { opacity: 0.4; transform: translateY(-4px); }
+  84%  { opacity: 0.8; transform: translateY(0); }
+  92%  { opacity: 0.3; transform: translateY(-2px); }
+  100% { opacity: 0; transform: translateY(24px); }
+}
+
+@media (max-width: 480px) {
+  .home-card { padding: 32px 20px; }
+  .question-card { padding: 24px 16px; }
+  .result-card { padding: 24px 16px; }
+  .idol-name { font-size: 1.8rem; letter-spacing: 2px; }
+  .bar { width: 22px; }
+  .chart { height: 140px; }
+  .option { font-size: 0.85rem; padding: 12px 14px; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ====== Home ====== -->
+  <div class="stage active" id="stage-home">
+    <div class="home-card">
+      <h1>这位老公喜欢你的追星模式</h1>
+      <div class="subtitle">一份非常认真（但也非常不正经）的梦女适配度测试</div>
+      <div class="desc">
+        <p>20道沉浸式场景题，深入你的追星人格底层代码。</p>
+        <p>没有正确答案，只有你的真心——和你命中注定的那位（或者那几位）老公。</p>
+        <p>请放松，诚实作答。测试约需 5 分钟。</p>
+      </div>
+      <button class="btn" onclick="startQuiz()">寻找我的老公</button>
+    </div>
+  </div>
+
+  <!-- ====== Quiz ====== -->
+  <div class="stage" id="stage-quiz">
+    <div class="quiz-header">
+      <span class="progress-text" id="progressText">1 / 20</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="question-card">
+      <div class="question-num" id="questionNum"></div>
+      <div class="question-text" id="questionText"></div>
+      <div class="options" id="options"></div>
+    </div>
+    <div class="quiz-nav">
+      <button class="btn btn-secondary" id="btnPrev" onclick="prevQuestion()">上一题</button>
+      <button class="btn" id="btnNext" onclick="nextQuestion()">下一题</button>
+    </div>
+  </div>
+
+  <!-- ====== Ending Overlay ====== -->
+  <div class="ending-overlay" id="endingOverlay" style="display:none;">
+    <div class="wave-text" id="waveText"></div>
+  </div>
+
+  <!-- ====== Result ====== -->
+  <div class="stage" id="stage-result">
+    <div class="result-card">
+      <div class="idol-sparkle">✦ 你的命定老公 ✦</div>
+      <div class="idol-name" id="idolName"></div>
+      <div class="idol-label" id="idolGroup"></div>
+
+      <div class="husband-card">
+        <div class="label">老公属性</div>
+        <div class="traits" id="husbandTraits"></div>
+        <div class="lovestory" id="loveStory"></div>
+      </div>
+
+      <div class="chart-section">
+        <h3>你的梦女维度画像</h3>
+        <div class="chart" id="chart"></div>
+        <div class="chart-legend" id="chartLegend"></div>
+      </div>
+
+      <div class="runner-up" id="runnerUp"></div>
+      <button class="btn" onclick="resetTest()">重新测试</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ==================== 爱豆数据 ====================
+// 每个爱豆的5维档案 [年上年下A, 浪漫风格B, 相处黏度C, 性格匹配D, 精神需求E] 均1-4
+const idolProfiles = {
+  '得能勇志': { group:'NCT WISH', A:1.5, B:2.0, C:2.0, D:2.5, E:2.0 },
+  '前田陸':   { group:'NCT WISH', A:1.0, B:3.5, C:4.0, D:2.5, E:4.0 },
+  '藤永咲哉': { group:'NCT WISH', A:1.0, B:3.0, C:4.0, D:3.0, E:3.5 },
+  '朴元彬':   { group:'RIIZE',    A:1.5, B:2.0, C:2.5, D:3.0, E:2.0 },
+  '郑成灿':   { group:'RIIZE',    A:2.0, B:2.5, C:3.0, D:3.0, E:2.5 },
+  '李灿荣':   { group:'RIIZE',    A:1.5, B:3.0, C:3.0, D:2.5, E:4.0 },
+  '将太郎':   { group:'RIIZE',    A:1.5, B:2.5, C:3.5, D:3.0, E:2.5 },
+  '严成玹':   { group:'RIIZE',    A:2.5, B:2.5, C:2.5, D:3.0, E:2.5 },
+  '田柾国':   { group:'BTS',      A:2.0, B:3.5, C:3.5, D:2.0, E:3.5 },
+  '边伯贤':   { group:'EXO',      A:2.5, B:4.0, C:3.5, D:2.5, E:4.0 },
+  '金泰亨':   { group:'BTS',      A:2.0, B:2.5, C:2.5, D:2.5, E:3.5 },
+  '闵玧其':   { group:'BTS',      A:4.0, B:1.5, C:1.5, D:4.0, E:1.5 },
+  '朴智旻':   { group:'BTS',      A:2.0, B:3.5, C:4.0, D:2.5, E:2.0 },
+  '安乾镐':   { group:'THE BOYZ', A:2.0, B:3.0, C:3.0, D:2.5, E:3.0 },
+  '李贤在':   { group:'THE BOYZ', A:3.5, B:2.5, C:2.5, D:3.5, E:2.0 },
+  '金善旴':   { group:'THE BOYZ', A:1.5, B:3.5, C:3.0, D:2.0, E:4.0 },
+  '罗渽民':   { group:'NCT DREAM',A:1.5, B:4.0, C:3.5, D:2.5, E:3.5 },
+  '李楷灿':   { group:'NCT',      A:1.5, B:3.5, C:4.0, D:2.0, E:4.0 },
+  '朴志晟':   { group:'NCT DREAM',A:1.0, B:2.5, C:3.5, D:3.0, E:2.5 },
+};
+
+// 爱豆结果文案
+const idolResults = {
+  '得能勇志': {
+    traits: '清冷外表下藏着只对你展露的温柔。他是那种在练习室里对所有人大声说话唯独在你面前轻声细语的男人。不多话，但每个眼神都在说"我看到了你"。不需要时时刻刻证明爱，但你知道他是你的。',
+    story: '你们的关系像一首慢节奏的R&B——他可能不会每天说爱你，但会记得你三个月前随口提的一家咖啡店，然后在某个疲累的夜晚突然牵你手说"走吧，那家店还开着"。他不是话多的类型，但他看你的眼神，比任何甜言蜜语都让人腿软。'
+  },
+  '前田陸': {
+    traits: '阳光开朗的快乐小狗系老公。永远第一个给你发早安消息，你的每条朋友圈他都认真看完并且记住。笑起来眼睛弯弯的，让你觉得世界都没那么糟糕了。他的爱是热烈的、坦荡的，像夏天正午的阳光打在脸上——有点太烫了但你舍不得躲。',
+    story: '和他在一起的每一天都有一种"啊我真的被好好爱着"的感觉。他会突然发来语音消息，背景音是同事的起哄声，他对他们说"别吵，我在跟我老婆说话"。你生气的时候他会围着转圈道歉，直到你忍不住笑出来为止。然后他就会得意地说"我就知道你还爱我"。'
+  },
+  '藤永咲哉': {
+    traits: '黏人精忙内型老公，主打一个"姐姐没有我你怎么办"。在外是可以独当一面的克里斯马，关上房门就变成一个会撒娇的大型挂件。他的可爱是天然的，不刻意的——让你忍不住想揉他头发，又想让他在外面继续闪闪发光。',
+    story: '专属你的反差萌怪物——舞台上眼神犀利冷冽，一下台就趴在休息室的沙发上给你发"累死了好想你"。你俩的相处模式大约就是你骂他"你能不能自己待一会儿"，他委屈巴巴放开手，三分钟后你又默默把肩膀靠过去。"你终于理我了！"——他是真的会为这种事开心。'
+  },
+  '朴元彬': {
+    traits: '高岭之花般的冷美男外表下，藏着一颗只为你跳动的心脏。他是那种在人群里不说话也发光的存在，而你是唯一知道他会为了一杯热可可而赖床的人。他的爱不喧哗，但有重量——像冬天裹在脖子上的羊绒围巾。',
+    story: '外人眼里的他冷得像一座雕塑，但在你面前——他会窝在沙发里让你给他剪刘海，剪完之后对着镜子皱眉半天却没有一句抱怨。你们的恋爱是午后阳光透过百叶窗的光影，安静、温暖、不急不躁。他会突然说"跟你在一起的时候，我觉得自己能做好任何事"。'
+  },
+  '郑成灿': {
+    traits: '温柔稳重的年下绅士。他不会说很夸张的情话，但你的每一次情绪波动他都能察觉。他总是那个在你焦虑的时候说"没关系，我们一步步来"的人。他的爱像24小时恒温空调——不是轰烈的热浪，但你知道屋里永远有最舒适的温度。',
+    story: '你加班到深夜回家看到他在餐桌前睡着了，桌上是热了不知道多少遍的晚饭。你摇醒他，他迷迷糊糊第一句话是"饭凉了，我去给你热"。你不小心掉了眼泪，他慌了，以为自己做错了什么。其实你没做错任何事——你是被"有人等你回家"这种具体而微的幸福击中了。'
+  },
+  '李灿荣': {
+    traits: '阳光开朗大男孩型的快乐老公。他是你的专属笑点制造机，也是你深夜失眠时最佳陪聊选手。他有一种让所有事情都变轻松的超能力——和他在一起，你觉得无聊的日常也变得像综艺一样有趣。他的爱是热烈的、真诚的，像一团不烫人的篝火。',
+    story: '你们的恋爱日常大概就是：他在客厅弹吉他跑调，你在厨房煮拉面，突然他冲进厨房说"我给你写了一首歌！"但其实那首歌连调都没有。你笑他，他委屈，最后变成了两个人一起盘腿坐在沙发上研究怎么用GarageBand——并且对着一首浆糊一样的demo骄傲地宣布"这是我们的歌"。'
+  },
+  '将太郎': {
+    traits: '害羞但无比真诚的舞担系老公。他不太会用语言表达，但他会用行动让你知道你在被爱。舞台上他是掌控一切的王者，舞台下他会红着耳朵跟你说"今天的编舞里有一个动作，我是想着你跳的"。他的爱是细腻的、柔软的，像静水深流。',
+    story: '你第一次看他彩排的时候，朋友偷偷告诉你"他刚才看到你来了之后跳舞状态都不一样了"。你假装没听见，但心里已经在放烟火。你们的日常是他练舞你在旁边看书，休息间隙他滑过来躺你腿上，水还没喝就睡着了。你看他的脸想：这个全世界都夸跳舞很帅的男人，此刻只是你的大猫咪。'
+  },
+  '严成玹': {
+    traits: '温暖可靠的成熟系老公。在你迷茫的时候他总是先说"我在"，然后陪你一起想方案。他的爱不是戏剧化的，但每一次你回头看，他都在。他是那种会默默把你的烦恼变成小事情的人，因为在你开口之前他就已经着手解决了。',
+    story: '你和他抱怨工作上的破事，他听了一小时后说"明天我陪你去"。你以为他只是说说——第二天早上他西装革履出现在你公司楼下，手里拿着两杯咖啡，对你说"别紧张，今天你是全场最牛的"。你不是因为喝了咖啡才心跳加速，但你知道今天一定会很顺利。'
+  },
+  '田柾国': {
+    traits: '全能黄金忙内，可奶可狼的究极老公。在外面是可以徒手掰弯钢筋的肌肉兔子，回到家是问你"姐姐我今天表现好吗"的大型幼犬。他的爱炽热而纯粹，没有中间地带——爱一个人就要爱到极致。他身上同时有少年的天真和男人的担当。',
+    story: '你俩的经典画面：他在录音室里泡到半夜，你拎着夜宵出现在门口——他耳机还没摘就跑过来抱你，差点被线绊倒。他一边吃东西一边给你听今天的demo，眼睛亮晶晶地等你评价。你说"很好听"，他笑得眼睛都没了。其实在遇到你之前，他不知道自己笑起来这么好看。'
+  },
+  '边伯贤': {
+    traits: '表面上是你追他，实际上是他把你拿捏得明明白白的年上狐狸。永远比你先一步看穿你的心思，在你还没开口的时候就已经帮你解决了问题——顺便附赠一个得意的小表情。他的幽默是武器，他的温柔是底牌，他让你笑着爱上他然后发现根本离不开。',
+    story: '你和他吵架——准确地说，是你单方面在生气。他靠在门框上看你炸毛的样子，突然笑出声来。"你笑什么？！""笑自己——怎么把你惹生气了还能觉得你这么可爱。"你气不下去了。这就是边伯贤，你永远吵不赢他，但你也永远不想赢。毕竟赢了的人要负责哄对方，而这部分他做得比谁都好。'
+  },
+  '金泰亨': {
+    traits: '四次元神秘艺术系老公，你永远猜不到他下一步要做什么——但你永远期待。他会在凌晨三点叫你起来看满月，用吉他弹和你同名的那首歌，把你们的自拍用油画风格重新画一遍。他的爱是诗，不押韵但每一句都写进了你心里。',
+    story: '和他在一起的每一天都是开盲盒——你可能在下班后被拉去汉江边看鸭子，也可能在周末被带到美术馆里对着展品听他编出的世界观。你问他为什么选你，他歪着头认真思考后说"因为你的频率和我是同步的"。那一刻你知道了——你俩就是这个世界上最浪漫的两个小疯子。'
+  },
+  '闵玧其': {
+    traits: '外冷内热的爹系老公。他对世界冷漠，但对你例外。别人眼里的他不好相处，但在你面前的他会因为一碗热汤露出软乎乎的表情。他的爱不说出来，全藏在凌晨工作室里为你留的那盏灯、冰箱上贴的"记得吃饭"便利贴、以及你睡着时他悄悄调的空调温度里。',
+    story: '你生病了没有告诉他——但第二天他的车停在你楼下，手里拎着药和粥。"怎么知道我——""你的ins story。凌晨两点，发烧还刷手机，你是笨蛋吗。"语调冷淡，但掖被角的动作比谁都轻。他坐在你床边改歌词，你迷糊中听到一句——"...她是我唯一的晴天"。你假睡，假装没听到。但他知道你没睡着。你们心照不宣。'
+  },
+  '朴智旻': {
+    traits: '温柔到骨子里的感性系老公。他是那种会因为看到一片好看的云拍下来发给你的人。他的爱像潮水，柔软但不可阻挡——直到你发现自己已经被他包围了。他很黏人但黏得恰到好处，让你觉得自己被需要——而这份"被需要"本身，就是他给你的安全感。',
+    story: '他对你说过最甜蜜的话不是"我爱你"，而是"跟你在一起的时间是我一天里最喜欢的部分"。你俩的相处日常是他练舞你在一旁看——等他跳累了歪在你肩上刷手机，偶尔抬头用鼻尖蹭蹭你的脸。你问他干嘛，他说"充电"。你问充够了没，他说"这辈子都充不够"。'
+  },
+  '安乾镐': {
+    traits: '温暖阳光的邻家型老公。他给人一种"这个人不会伤害我"的安心感。他的爱很轻松，不沉重——喜欢你这件事对他来说是和呼吸一样自然的存在。他不会给你压力，但你每一次需要的时候他一定在。他就是那个让你觉得"谈恋爱也不是很难嘛"的人。',
+    story: '他说喜欢你那天，没有任何铺垫——约你在食堂吃饭，剥了个橘子递过来，说"你吃了这个就是答应和我在一起了"。你被他的逻辑震惊到说不出话，但你还是接过了橘子。后来他坦白，这个告白方案他想了两个月——甚至列了个Excel表评估各种方案的风险。你笑着揍他，他说这就是他要的效果。'
+  },
+  '李贤在': {
+    traits: '年上贵公子型老公，成熟、稳重、优雅——但只有你知道他喝多了会靠在路边长椅上唱歌。他的爱是有分寸的、体面的，在你需要的时候恰到好处地出现。他是那个让你觉得"被偏爱"的人——因为在所有人面前都是绅士的他，只在你面前幼稚。',
+    story: '你第一次带他去见朋友，全程他表现得礼貌周到、进退有度。结果出了门他突然拽你袖子："我刚才应该没给你丢脸吧？"——眼神里是难得的不安。你笑着牵住他的手说没有，他肉眼可见地松了一口气。外表是贵公子，里面其实是一颗不想让你失望的心——这反差你觉得超可爱的。'
+  },
+  '金善旴': {
+    traits: '搞笑体质+演技派老公——他的人生原则是"逗你开心是第一生产力"。他的幽默不是刻意的，是骨子里自带的；但他的深情是认真的，每一个不经意的套路里都装满了对你的在乎。他是那种笑着笑着让你哭了，哭完又被他逗笑的类型。',
+    story: '他给你发了一封好长的pdf，标题是"关于我和你的适配度分析报告"，里面正儿八经地列了你们的MBTI、星座、血型——结尾写"综上所述，建议立即交往。如已交往，建议立即结婚"。你以为他是开玩笑，但翻到最后一页——他把他俩的合照P成了一张结婚证。你笑骂他幼稚，心里已经开始挑婚纱了。'
+  },
+  '罗渽民': {
+    traits: '甜言蜜语满级的浪漫主义老公。他的嘴巴像装了情话生成芯片——而且每一句都是定制的。他不是在说情话，他是真的这么想。他的爱是全世界都看得见的——手机壁纸是你、ins关注里最好找的是你、在采访里提到"理想型"直接报你特征的那种看得见。',
+    story: '你问他"你为什么那么爱在镜头前提我"，他想都没想说"因为我本来就是这么想的啊，我只是在说实话。"——这个人说情话不需要打草稿，因为他全是真心。你们的日常就是他给你发很多很多张天空的照片，每张下面写着"想你了""今天的也很想你""这个颜色让你看起来很漂亮虽然你不在照片里"。是的他就是这种人——让你在每一件小事里都被明确地爱着。'
+  },
+  '李楷灿': {
+    traits: '调皮捣蛋但其实比谁都细心的反差系老公。每天都说一些让你又好气又好笑的话，但当你真的难过时——他是全世界最会哄你的人。他的爱是三份搞笑两份温柔一份赖皮的黄金配比，让你每天醒来都觉得自己在演一部浪漫喜剧。',
+    story: '他气你的时候——把你奶茶的珍珠都吸完了给你留一杯奶茶水，你生气了，他笑嘻嘻捧出一杯新的、加双倍珍珠的："就知道你会生气，所以早就买好第二杯了。"你俩的恋爱就是你来我往的相爱相杀——但他套路你八百次，你每次还是在最后一步心软。毕竟他笑起来的时候，你觉得被捉弄也不是什么大事。'
+  },
+  '朴志晟': {
+    traits: '巨型忙内，从害羞小孩一路成长为你专属的可靠男人。他的爱本身就是一部养成系连续剧——你看着他从小豆丁变成现在能独当一面的样子，而他对你的依赖和信任从未减少。他的爱是纯粹而真挚的，像一颗没有杂质的钻石。',
+    story: '他第一次叫你全名的时候你吓了一跳——因为平时都是乖乖叫姐姐的。然后他看着你的眼睛说"我已经长大了，可以保护你了"。你想笑他中二病发作，但鼻子先酸了。是的，从什么时候开始，那个和你说话会耳朵红的男孩已经可以在舞台上掌控全场了——但在你面前，他永远还是那个想得到你夸奖的朴志晟。'
+  },
+};
+
+// ==================== 题目数据 ====================
+// options: 每个选项 { text, scores: [A,B,C,D,E] }
+const questions = [
+  {
+    id: 1,
+    text: '和朋友去首尔，被拉进江南某家夜店，镭射灯晃过角落时，你分明看见心肝随着音乐轻晃的侧脸，下颌线锋利得像要割断你的理智，你决定：',
+    options: [
+      { text: '装作不小心的样子撞进他怀里，然后抬头用练习过一万次的眼神说”啊，不好意思”', scores: [0,4,2,1,1] },
+      { text: '立刻拍数十张照片并且打开手机备忘录，冷静记录时间地点人物，准备发送给公司进行敲诈', scores: [1,0,0,0,4] },
+      { text: '退到阴影里，就着震耳欲聋的鼓点，像拍电影一样流下一滴被辜负的泪', scores: [0,1,2,3,0] },
+      { text: '跳上卡座，举起手幅灯牌，用军训喊话的音量大喊”xxx，妈妈不允许你这样！”', scores: [0,0,0,1,4] },
+    ],
+  },
+  {
+    id: 2,
+    text: '你最近疲乏了，对新tour的男豆正是上头期，像热恋一样甜蜜。可看到心肝的视频签售，还是咬咬牙收了名额。接通那一秒，心肝定定看着你，忽然弯起眼睛：”好久不见。前几天我刷到你在别人那里的热评了。”你：',
+    options: [
+      { text: '瞳孔地震，脱口而出”那是别人盗我号！你知道的我心里只有你”', scores: [0,3,3,2,2] },
+      { text: '从脖子红到耳朵尖，张了张嘴，一个字也说不出来，像被正宫抓包的负心人', scores: [0,1,3,4,0] },
+      { text: '立刻换上最可怜的表情，软着声音说”欧巴你听我解释，他们只是你的替代品，我喝醉了才会那样”', scores: [0,2,4,2,2] },
+      { text: '果断忽略，大声”Pardon？”，然后以平生最快语速把预先写在纸条上的彩虹屁朗读完毕', scores: [0,0,0,1,4] },
+    ],
+  },
+  {
+    id: 3,
+    text: '心肝终于开了个人见面会，你抽中互动，他微笑问你：”最喜欢我的哪首歌？”聚光灯烤着你，大脑一片空白，你听见自己说：',
+    options: [
+      { text: '对家那首火遍大街的主打歌名，说完后全场寂静得连呼吸都有回音', scores: [0,0,0,0,4] },
+      { text: '”我最喜欢《你》。”在他疑惑的目光中补充：”是你亲自写的、只存在我梦里那首。”说完哭了', scores: [0,3,3,3,0] },
+      { text: '突然戏瘾大发，深情背诵了一段他出道前在电台翻唱的小众英文诗，背完才发现话筒一直没开', scores: [0,2,0,1,3] },
+      { text: '”最喜欢？当然是还没出的那首！所以你能不能现场给我剧透一句？”', scores: [0,1,0,0,4] },
+    ],
+  },
+  {
+    id: 4,
+    text: '家族演唱会上，心肝和同公司后辈互动不断，甚至还自然地揽了一下对方的腰。你坐在屏幕前，手里的应援棒在顿住的一瞬间：',
+    options: [
+      { text: '疯狂尖叫：”啊啊啊啊儿子开窍了！妈妈今晚就给你们写文！”', scores: [0,3,0,0,4] },
+      { text: '牙快咬碎，开启截图模式，把后辈从头到脚放大分析，在小群打出两千字”这人绝非善类”的分析报告', scores: [0,0,3,0,2] },
+      { text: '表面岁月静好发”甜甜甜”，背地里打开匿名信箱，投稿”扒一扒某倒贴后辈的十八个心机瞬间”', scores: [0,2,0,0,3] },
+      { text: '冷静地关掉直播，开始给闺蜜发语音：”完了，我心肝被人觊觎上了。”', scores: [0,0,0,0,4] },
+    ],
+  },
+  {
+    id: 5,
+    text: '签售会上轮到你了，你提前在纸条上写好要问的问题。结果心肝接过去看了一眼，对你说：”你的字真好看。”你脑子瞬间炸开烟花，准备好的问题忘光，挂断视频后发现：他拿纸条的姿势、说这句话的语气，和上一位粉丝、上上一位粉丝一模一样。你此刻的心情是：',
+    options: [
+      { text: '面红耳赤地对着黑屏反复念”他说我字好看”，宁可相信这是二十个粉丝里独独对你说的真心话，当即下单了练字帖，要让这句夸奖名副其实', scores: [0,1,0,0,3] },
+      { text: '先是被巨大的甜蜜击中，然后手脚冰凉——原来他也在营业，你对这场关系心知肚明却甘愿沉溺，于是打开私密日记本，写下”今天，我们又互相欺骗了一次”', scores: [1,0,2,1,1] },
+      { text: '冷酷地翻出过往所有签售录屏，一帧帧对比他看自己的眼神，得出结论：今天这个眼神比别人多停留了0.3秒。你赢了', scores: [0,0,2,0,4] },
+      { text: '你微笑着对空气说：”嗯，我知道的。” 然后平静地把准备好的流程读完，却在挂断后把那张纸条复印塑封，当作圣物', scores: [1,0,2,4,0] },
+    ],
+  },
+  {
+    id: 6,
+    text: '你在二手平台收心肝的绝版拍立得，卖家指定面交。去的路上心里打鼓，到了发现卖家竟是分手半年的前任。他晃着那张小卡，吊儿郎当：”还追呢？跟我复合，这卡送你。”你看着那张日思夜想的卡，笑了一下：',
+    options: [
+      { text: '以迅雷之势一把夺过，转身百米冲刺跑走，边跑边回头喊”谢了前夫哥！”', scores: [0,3,0,0,4] },
+      { text: '扫码，冷静输入一个高出市价一倍的金额，付完款拿起卡片说了句”我追星比追你靠谱”，留他一个人在风中凌乱', scores: [3,0,0,0,1] },
+      { text: '”行，复合。”你拿到卡后精细拍照存档，第二天立刻冷暴力分手，并在咸鱼给他打赏了”谢谢冤种”', scores: [0,0,0,0,3] },
+      { text: '端详着拍立得，轻飘飘开口：”这张卡，和你一样，放得越久越不值钱。自己留着吧。”', scores: [2,0,0,0,2] },
+    ],
+  },
+  {
+    id: 7,
+    text: '在心肝的快闪店排了三小时队，轮到你的前一刻，最后一套限定卡被前面的人买走。那人转过头，竟是你多年未见的小学同学，她得意地晃了晃战利品，你：',
+    options: [
+      { text: '当场眼泪汪汪，身体缓缓滑倒躺在柜台前边死死抵住身后暴躁的排队粉丝们，碰瓷般收银员说”姐姐，能把这边的展示卡送我一张吗，就一张”，店员害怕给了你海报', scores: [0,1,4,4,0] },
+      { text: '优雅一笑：”没关系。”随后在停车场出口等她，用最甜的声音问”姐妹拼不拼车，我送你”，上车后关门谈判，原价拿下', scores: [3,0,0,0,2] },
+      { text: '拿出手机拍下她拿着卡的嘚瑟样子，登上追星号发帖：”遇到前世仇人了，求高价收，愿意为爱负债。”', scores: [0,2,0,1,3] },
+      { text: '当着她面打开手机银行，冷静告诉她：”价你出，我就说一次。”用一个月工资买下后，拍了张照发朋友圈，配文”拿捏”', scores: [2,0,0,0,2] },
+    ],
+  },
+  {
+    id: 8,
+    text: '心肝跨界演戏，演技尴尬上了热搜，弹幕全是”脚趾扣地”。你看着屏幕里他认真的脸，深吸一口气：',
+    options: [
+      { text: '加入弹幕狂欢：”扣出了一座芭比梦想城堡，欢迎拎包入住！”然后忍不住又刷了一遍他的直拍洗眼睛', scores: [0,0,0,0,4] },
+      { text: '凌晨三点不睡，逐帧截图写千字分析帖，论述其表演带有布莱希特式的间离效果，是观众不懂欣赏', scores: [0,4,0,0,3] },
+      { text: '默默举报每一条刻薄弹幕，关掉所有软件，把进度条拉回他仅有的一点高光时刻，反复看了无数遍', scores: [0,1,3,3,0] },
+      { text: '热情地将其安利给对家粉：”这是年度神作，不看后悔一辈子。”然后把对方拉黑', scores: [0,0,0,0,4] },
+    ],
+  },
+  {
+    id: 9,
+    text: '深夜刷到心肝的恋爱爆料帖，时间线、同款、行程高度重合，你的手指开始发抖，几乎是本能地：',
+    options: [
+      { text: '点开备忘录奋笔疾书几千字，一键发送给脱粉回踩，并且送几张堪比黑白米老鼠图给老爹站', scores: [1,3,0,0,0] },
+      { text: '把头埋进被子里，闷声大哭，脑子里走马灯般闪过第一次见他、为他学会打投、为他哭过的每一个夜晚', scores: [0,1,4,4,0] },
+      { text: '冷笑着点开评论区，十指翻飞：”妈呀大姐又来了是吧，不知道只知道我宝直拍播放量已壁了全世界，曼妙至极”', scores: [0,0,0,1,4] },
+      { text: '光速冲进超话，把最新澄清帖逐字读完，然后打开音乐软件，把心肝的安可曲调到最大声，在心跳的鼓噪里选择相信', scores: [2,0,2,3,0] },
+    ],
+  },
+  {
+    id: 10,
+    text: '命运开了个玩笑，你的男友，和心肝有七分相似的眉眼。可他骨子里却与心肝完全相反，还总当着你的面轻蔑地笑：”你那个心肝宝贝，不过是韩国财阀手里一个玩意儿罢了。”两年交往他对你真心真意没有原则性大错，只是不尊重你的月亮。你注视着他那张脸，慢慢开口：',
+    options: [
+      { text: '”卧草尼玛币的，尼斯了知不知道。”', scores: [0,4,0,0,3] },
+      { text: '”我男友跟黑人跑了，你知不知道。”', scores: [0,2,0,0,4] },
+      { text: '”我给你一次重新组织语言的机会，我珍惜我们之间的感情，希望你也能尊重我心里那块干净的地方。”', scores: [3,0,2,2,0] },
+      { text: '什么也没说，只是平静地摘下对戒，轻轻放在桌上，像完成了一场漫长的告别', scores: [2,0,0,0,1] },
+    ],
+  },
+  {
+    id: 11,
+    text: '朋友当着你面吐槽：心肝身材管理是不是废了，脸圆了一圈还在综艺里傻乐。你盯着那张确实圆润但笑容灿烂的脸，心里翻涌过后，你回：',
+    options: [
+      { text: '”这叫幸福肥你懂个屁”，深夜却偷偷给他工作室私信推荐轻食菜单', scores: [0,2,2,2,3] },
+      { text: '沉默不语，回去后迅速买了一波营销号，文案：”恳请造型师救救我哥的颧骨失踪问题”', scores: [0,0,0,0,3] },
+      { text: '你发现自己竟然没有愤怒，只是轻轻叹气——如果他真的快乐，你可以试着学会冷脸洗内裤式应援', scores: [2,0,1,2,0] },
+      { text: '”是啊，像一只被爱吹胀的气球，但那又怎样呢，我还是会接住这只小熊。”', scores: [1,1,2,2,0] },
+    ],
+  },
+  {
+    id: 12,
+    text: '你曾因他状态下滑、舞台划水而走上辱追路，每日在匿名区狠狠锐评。近来他却奇迹般回春，下颌线锋利得划破次元壁，还发了一张自拍，配文：”好久不见。”你盯着那张脸：',
+    options: [
+      { text: '火速把所有辱追博文一键转为仅自己可见，申请新号，简介写下”重生归来，只做甜唯”', scores: [0,2,2,1,3] },
+      { text: '转发那条自拍，写了一篇万字小作文忏悔录，结尾是”妈妈，我错了，你还是我爸爸”', scores: [0,4,3,3,0] },
+      { text: '冷静地放大图片细节，分析这是否只是回光返照的P图效果，决定再观望一阵，狗头保命', scores: [2,0,0,0,3] },
+      { text: '长按保存，设成壁纸，然后打开辱追号写下最后一条：”暂时休战，等你下次变丑。”', scores: [1,0,1,0,4] },
+    ],
+  },
+  {
+    id: 13,
+    text: '心肝几年前的一首老歌突然逆袭，冲上音源榜，评论区涌进无数路人夸奖。你一条条翻着那些迟来的善意，心情是：',
+    options: [
+      { text: '比夸自己还高兴，走路都带风，逢人就安利：”你听过这首吗？没听过我们有缘，听过了我们上辈子就认识”', scores: [0,3,0,0,3] },
+      { text: '一边感动到鼻酸，一边精准地给每一个夸夸的路人回复”谢谢喜欢！顺便可以听听他新歌《xxxx》”', scores: [1,2,0,0,2] },
+      { text: '小心翼翼存下这些评论，像攒证据一样贴在备忘录里，在深夜对自己说”你看，他值得的”', scores: [0,1,2,3,0] },
+      { text: '冷静地发了一条动态：”火了是好事，但别捧杀。这歌当初被群嘲的时候，你们在哪。”', scores: [3,0,0,0,1] },
+    ],
+  },
+  {
+    id: 14,
+    text: '心肝在演唱会上突然安静下来，对着全场说：”有时候我觉得自己不值得被这么爱。”全场大喊”你值得”，你旁边的妹子已经哭出声了。而你：',
+    options: [
+      { text: '用尽全身力气喊”你值得！！”喊到嗓子劈了——然后咳嗽着继续高举应援棒，比谁举得都高', scores: [0,3,2,1,0] },
+      { text: '突然安静下来，眼泪默默往下掉——你想起自己也曾觉得自己不值得被爱，但追他的这程路，你学会了爱自己', scores: [2,1,2,3,0] },
+      { text: '掏出手机打开手电筒高高举起——满场星光中你想，如果他的世界偶尔黑暗，那你就做他的一束光', scores: [1,0,2,2,0] },
+      { text: '”这人又在虐粉了”——但手已经在擦眼泪了。嘴硬王者就是你，但心软王者也是你', scores: [0,0,0,0,4] },
+    ],
+  },
+  {
+    id: 15,
+    text: '你爬墙新欢第三个月，日子过得没心没肺。直到一个雨夜，刷到心肝在音乐节大雨里跳舞的直拍——他发着烧，还在笑，雨水顺着刘海滴进眼睛里。你盯着屏幕，忽然想起那些崩溃的深夜，也是这张脸对你说”加油”。于是你：',
+    options: [
+      { text: '把新欢的备注默默改成了”菀菀类卿一号”', scores: [0,0,1,0,3] },
+      { text: '凌晨三点，像做贼一样点开心肝超话，连续签到了七天，补上了这三个月的空白', scores: [1,1,3,2,0] },
+      { text: '发了一条仅自己可见的朋友圈：”有些人说不清哪里好，但就是谁都替代不了。”然后蒙着被子哭了一场', scores: [2,1,2,3,0] },
+      { text: '流着泪地把视频转发给闺蜜，附文”我这辈子都没办法离开这个坏男人了”，随后反应过来闺蜜并不追星，但是你依旧流着泪狂轰乱炸自己的情绪小作文', scores: [0,0,0,0,4] },
+    ],
+  },
+  {
+    id: 16,
+    text: '你厌倦过，热烈过，在深夜一边骂一边反黑，最终走上了辱追这条最坏的路。某天，下沉平台推给你一条视频，BGM是Angel：心肝从练习室里一遍遍跌倒的少年，叠化成万人体育馆中央掩面流泪的大明星。你看完：',
+    options: [
+      { text: '手指悬在屏幕上方，要往下滑，却像被钉住一样，就这样眼眶发酸地循环了三遍', scores: [1,0,2,2,0] },
+      { text: '默默坐起身，在黑暗里给自己倒了杯冰水，喝完，打开手机，把那个有一万条辱追记录的账号注销了', scores: [3,0,0,0,1] },
+      { text: '泪砸在屏幕上那一刻，你突然听见自己心里冰层碎裂的声音，原来那份爱不是消失了，是被你埋得太深', scores: [0,3,3,3,0] },
+      { text: '轻嗤一声，用力压下那点翻涌的情绪，完整看完一遍，冷静下滑，只是那晚再没刷进去任何东西', scores: [2,0,0,0,2] },
+    ],
+  },
+  {
+    id: 17,
+    text: '你斥巨资又中了一次视频签售，他接通后看了你两秒，忽然笑了：”你上次说过喜欢我那件蓝色卫衣，我今天特意找出来穿了。”那是三年前，你在签售会上鼓起勇气的一句呢喃。你当场：',
+    options: [
+      { text: '激动到整张脸怼上镜头，破音大喊”你真的还记得！！”然后发现网卡了，画面定格在自己狰狞的脸上', scores: [0,4,4,1,2] },
+      { text: '大脑完全宕机，只会重复”你再说一遍你再说一遍”，泪如雨下，像要把这三年的思念都流干', scores: [0,3,4,4,0] },
+      { text: '先狂喜，继而心里咯噔一下——这是不是他对所有粉丝都用的营业话术？你陷入反复拉扯的过度思考', scores: [1,0,2,1,1] },
+      { text: '捂住嘴，泪光闪烁，咆哮着撕碎外衣漏出那件卫衣的情侣款，大声喊叫”欧巴我们是命中注定的缘分！”', scores: [2,1,0,0,0] },
+    ],
+  },
+  {
+    id: 18,
+    text: '心肝入伍那天，剃了青涩的寸头，隔着一道围栏朝粉丝敬礼。你举着”等你回来”的手幅，在人群里被挤得狼狈。他突然看向你这边，笑了笑。那一刻万籁俱寂，你忽然无比清晰地意识到：',
+    options: [
+      { text: '从今天起你要开始学理财，为两年后的退伍FM存出一个白金VIP', scores: [2,0,0,0,1] },
+      { text: '你爱的不止是舞台上光芒万丈的他，更是这漫长年月里，陪着他一起跌跌撞撞长大的自己', scores: [1,1,1,1,0] },
+      { text: '泪水模糊视线，恨不得立马军装上身为了欧巴承受折磨人的服兵役', scores: [2,1,2,3,0] },
+      { text: '你低头给闺蜜发消息，”我的青春暂停了，直到他回来那一刻我才可以继续我的少女时代”', scores: [0,0,0,0,4] },
+    ],
+  },
+  {
+    id: 19,
+    text: '颁奖典礼上，心肝捧起奖杯，眼眶通红，对着台下哽咽：”没有你们就没有我。”而那时的你，正处于半脱未脱的边缘，耳边是这句话，你：',
+    options: [
+      { text: '红着眼睛骂了一句”又来了，死男人好会虐粉”，手指却不受控制地给应援站打了一笔款', scores: [0,1,3,1,4] },
+      { text: '安静看完，然后打开社交平台，把那条写了很久的脱粉声明，一个字一个字地删掉了', scores: [2,1,2,2,0] },
+      { text: '冷着脸把这段感言单独剪出来，配上一段鬼畜音效做成短视频，标题起名《泪目，感动哭了家人们》', scores: [0,0,0,0,4] },
+      { text: '你在屏幕前泪流满面，用一整夜反复看这段视频，像在用他的眼泪，悼念自己即将死去的青春信仰', scores: [0,2,4,4,0] },
+    ],
+  },
+  {
+    id: 20,
+    text: '你做了一个梦。梦里他穿着练习生时期洗到发白的T恤，坐在舞蹈室地板上，对你温柔地笑了笑：”谢谢你这么用力地爱我，我们都要幸福。”你醒来时，枕头湿了一片，窗外天刚蒙蒙亮。你坐了很久，然后：',
+    options: [
+      { text: '擦干眼泪，开始收拾书桌上的周边，打算今天全部寄给还在爱他的同担——这次好像是认真的', scores: [3,0,0,0,0] },
+      { text: '打开微博，发了一条仅粉丝可见：”梦见他了，他说要各自幸福。我不，我就要缠着。”然后继续抡博', scores: [0,3,4,3,0] },
+      { text: '把梦里的细节一字一句记下，搜索”偶像托梦是不是前世今生的业力”', scores: [1,0,0,0,3] },
+      { text: '你没有动，只是把脸埋进手里。有些爱已经长进了骨头里，即使某天离他而去，也要先经历一场外科手术般的剥离', scores: [2,1,2,4,0] },
+    ],
+  },
+];
+
+// ==================== 维度名称 ====================
+const dimNames = ['年上年下', '浪漫风格', '相处黏度', '性格匹配', '精神需求'];
+const dimKeys = ['A','B','C','D','E'];
+
+// ==================== 状态 ====================
+let currentIndex = 0;
+let answers = new Array(questions.length).fill(-1);
+
+// ==================== 阶段切换 ====================
+function showStage(id) {
+  document.querySelectorAll('.stage').forEach(s => s.classList.remove('active'));
+  document.getElementById('stage-' + id).classList.add('active');
+}
+
+// ==================== 开始测试 ====================
+function startQuiz() {
+  currentIndex = 0;
+  answers = new Array(questions.length).fill(-1);
+  showStage('quiz');
+  renderQuestion();
+}
+
+// ==================== 渲染题目 ====================
+function renderQuestion() {
+  const q = questions[currentIndex];
+  document.getElementById('questionNum').textContent = `QUESTION ${q.id}`;
+  document.getElementById('questionText').textContent = q.text;
+  document.getElementById('progressText').textContent = `${currentIndex + 1} / ${questions.length}`;
+  document.getElementById('progressFill').style.width = ((currentIndex + 1) / questions.length * 100) + '%';
+
+  const btnPrev = document.getElementById('btnPrev');
+  const btnNext = document.getElementById('btnNext');
+  btnPrev.style.visibility = currentIndex === 0 ? 'hidden' : 'visible';
+  btnNext.textContent = currentIndex === questions.length - 1 ? '揭晓结果' : '下一题';
+
+  const optionsDiv = document.getElementById('options');
+  optionsDiv.innerHTML = '';
+
+  const letters = ['A', 'B', 'C', 'D'];
+  const saved = answers[currentIndex];
+
+  q.options.forEach((opt, idx) => {
+    const div = document.createElement('div');
+    div.className = 'option' + (saved === idx ? ' selected' : '');
+    div.innerHTML = `<span class="letter">${letters[idx]}</span><span>${opt.text}</span>`;
+    div.addEventListener('click', () => selectOption(idx));
+    optionsDiv.appendChild(div);
+  });
+}
+
+function selectOption(idx) {
+  answers[currentIndex] = idx;
+  document.querySelectorAll('.option').forEach((el, i) => {
+    el.classList.toggle('selected', i === idx);
+  });
+}
+
+// ==================== 导航 ====================
+function nextQuestion() {
+  if (answers[currentIndex] === -1) {
+    alert('请先选择一个选项哦~');
+    return;
+  }
+  if (currentIndex === questions.length - 1) {
+    showEnding();
+  } else {
+    currentIndex++;
+    renderQuestion();
+  }
+}
+
+function showEnding() {
+  // 隐藏quiz阶段
+  document.getElementById('stage-quiz').classList.remove('active');
+  // 显示结尾动画
+  const overlay = document.getElementById('endingOverlay');
+  const waveText = document.getElementById('waveText');
+  waveText.textContent = '不断追逐的过程中也请善待付出全部真心的自己';
+  overlay.style.display = 'flex';
+  // 强制回流后重置动画
+  waveText.style.animation = 'none';
+  waveText.offsetHeight;
+  waveText.style.animation = 'waveFloat 5s ease-in-out forwards';
+  // 动画结束后跳转结果
+  setTimeout(() => {
+    overlay.classList.add('fade-out');
+    setTimeout(() => {
+      overlay.style.display = 'none';
+      overlay.classList.remove('fade-out');
+      showResult();
+    }, 1000);
+  }, 5000);
+}
+
+function prevQuestion() {
+  if (currentIndex > 0) {
+    currentIndex--;
+    renderQuestion();
+  }
+}
+
+// ==================== 结果计算 ====================
+function calcScores() {
+  const totals = { A:0, B:0, C:0, D:0, E:0 };
+  questions.forEach((q, i) => {
+    const choice = q.options[answers[i]];
+    totals.A += choice.scores[0];
+    totals.B += choice.scores[1];
+    totals.C += choice.scores[2];
+    totals.D += choice.scores[3];
+    totals.E += choice.scores[4];
+  });
+  // 根据实际题目数据动态计算每维最大可能得分
+  const maxes = { A:0, B:0, C:0, D:0, E:0 };
+  questions.forEach(q => {
+    let mA=0,mB=0,mC=0,mD=0,mE=0;
+    q.options.forEach(opt => {
+      mA = Math.max(mA, opt.scores[0]);
+      mB = Math.max(mB, opt.scores[1]);
+      mC = Math.max(mC, opt.scores[2]);
+      mD = Math.max(mD, opt.scores[3]);
+      mE = Math.max(mE, opt.scores[4]);
+    });
+    maxes.A += mA; maxes.B += mB; maxes.C += mC; maxes.D += mD; maxes.E += mE;
+  });
+  // 归一化到1-4
+  const norm = {};
+  for (const k of dimKeys) {
+    norm[k] = Math.round(totals[k] / Math.max(maxes[k], 1) * 400) / 100;
+    norm[k] = Math.max(0.5, Math.min(4, norm[k]));
+  }
+  return norm;
+}
+
+function findBestMatch(user) {
+  // 中心化：减去个人均值，只比较维度间相对高低的"形状"
+  const userMean = (user.A + user.B + user.C + user.D + user.E) / 5;
+  const u = {
+    A: user.A - userMean,
+    B: user.B - userMean,
+    C: user.C - userMean,
+    D: user.D - userMean,
+    E: user.E - userMean,
+  };
+
+  let best = null, bestDist = Infinity;
+  const all = [];
+  for (const [name, prof] of Object.entries(idolProfiles)) {
+    const idolMean = (prof.A + prof.B + prof.C + prof.D + prof.E) / 5;
+    const d = Math.sqrt(
+      Math.pow(u.A - (prof.A - idolMean), 2) +
+      Math.pow(u.B - (prof.B - idolMean), 2) +
+      Math.pow(u.C - (prof.C - idolMean), 2) +
+      Math.pow(u.D - (prof.D - idolMean), 2) +
+      Math.pow(u.E - (prof.E - idolMean), 2)
+    );
+    all.push({ name, dist: d, group: prof.group });
+    if (d < bestDist) { bestDist = d; best = { name, dist: d, group: prof.group }; }
+  }
+  all.sort((a,b) => a.dist - b.dist);
+  const runners = all.slice(1, 4).map(a => a.name);
+  return { best, runners };
+}
+
+function showResult() {
+  const userScores = calcScores();
+  const { best, runners } = findBestMatch(userScores);
+  const res = idolResults[best.name] || { traits:'暂无数据', story:'暂无数据' };
+
+  document.getElementById('idolName').textContent = best.name;
+  document.getElementById('idolGroup').textContent = best.group;
+  document.getElementById('husbandTraits').textContent = res.traits;
+  document.getElementById('loveStory').textContent = res.story;
+
+  renderChart(userScores);
+
+  document.getElementById('runnerUp').innerHTML =
+    '备选老公：<strong>' + runners.join('</strong> / <strong>') + '</strong><br>——也都和你不相上下，但命中注定只有一个。';
+
+  showStage('result');
+}
+
+// ==================== 柱状图 ====================
+function renderChart(scores) {
+  const chart = document.getElementById('chart');
+  const legend = document.getElementById('chartLegend');
+  const maxScore = Math.max(...Object.values(scores), 0.5);
+
+  chart.innerHTML = '';
+  legend.innerHTML = '';
+
+  dimKeys.forEach((k, i) => {
+    const pct = Math.round(scores[k] / Math.max(maxScore, 0.01) * 100);
+    const wrapper = document.createElement('div');
+    wrapper.className = 'bar-wrapper';
+    wrapper.innerHTML = `
+      <div class="bar-value">${scores[k].toFixed(1)}</div>
+      <div class="bar" style="height:${pct}%"></div>
+      <div class="bar-label">${dimNames[i]}</div>
+    `;
+    chart.appendChild(wrapper);
+
+    const item = document.createElement('span');
+    item.className = 'legend-item';
+    item.textContent = dimNames[i] + ': ' + (scores[k] < 2 ? '(偏低)' : scores[k] > 3 ? '(偏高)' : '(中等)');
+    legend.appendChild(item);
+  });
+}
+
+// ==================== 重置 ====================
+function resetTest() {
+  answers = new Array(questions.length).fill(-1);
+  currentIndex = 0;
+  showStage('home');
+}
+</script>
+</body>
+</html>
